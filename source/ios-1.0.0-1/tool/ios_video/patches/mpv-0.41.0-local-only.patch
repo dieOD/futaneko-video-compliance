@@ -1,0 +1,143 @@
+diff --git a/demux/demux.c b/demux/demux.c
+--- a/demux/demux.c
++++ b/demux/demux.c
+@@ -66,22 +66,9 @@
+ extern const demuxer_desc_t demuxer_desc_null;
+ extern const demuxer_desc_t demuxer_desc_timeline;
+ 
+-static const demuxer_desc_t *const demuxer_list[] = {
+-    &demuxer_desc_directory,
+-    &demuxer_desc_disc,
+-    &demuxer_desc_edl,
+-    &demuxer_desc_cue,
+-    &demuxer_desc_rawaudio,
+-    &demuxer_desc_rawvideo,
+-    &demuxer_desc_matroska,
+-#if HAVE_LIBARCHIVE
+-    &demuxer_desc_libarchive,
+-#endif
++/* NijiNekoは検査済みWebM/MP4/MOVをlavfへ渡すだけに限定する。 */
++const demuxer_desc_t *const demuxer_list[] = {
+     &demuxer_desc_lavf,
+-    &demuxer_desc_mf,
+-    &demuxer_desc_playlist,
+-    &demuxer_desc_null,
+-    &demuxer_desc_mpv,
+     NULL
+ };
+ 
+diff --git a/player/client.c b/player/client.c
+--- a/player/client.c
++++ b/player/client.c
+@@ -1846,14 +1846,10 @@
+ 
+ int mpv_load_config_file(mpv_handle *ctx, const char *filename)
+ {
+-    lock_core(ctx);
+-    int r = m_config_parse_config_file(ctx->mpctx->mconfig, ctx->mpctx->global, filename, NULL, 0);
+-    unlock_core(ctx);
+-    if (r == 0)
+-        return MPV_ERROR_INVALID_PARAMETER;
+-    if (r < 0)
+-        return MPV_ERROR_OPTION_ERROR;
+-    return 0;
++    (void)ctx;
++    (void)filename;
++    // 外部設定ファイルは公開APIからも読み込ませない。
++    return MPV_ERROR_UNSUPPORTED;
+ }
+ 
+ static void msg_wakeup(void *p)
+diff --git a/input/cmd.h b/input/cmd.h
+--- a/input/cmd.h
++++ b/input/cmd.h
+@@ -129,6 +129,9 @@
+ extern const struct mp_cmd_def mp_cmds[];
+ extern const struct mp_cmd_def mp_cmd_list;
+ 
++// NijiNekoのローカル動画再生で必要なコマンドだけを許可する。
++bool mp_cmd_is_nijineko_allowed(const char *name);
++
+ bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
+ 
+ bool mp_input_is_scalable_cmd(struct mp_cmd *cmd);
+diff --git a/input/cmd.c b/input/cmd.c
+--- a/input/cmd.c
++++ b/input/cmd.c
+@@ -70,6 +70,31 @@
+     return false;
+ }
+ 
++bool mp_cmd_is_nijineko_allowed(const char *name)
++{
++    static const char *const allowed[] = {
++        "ignore",
++        "stop",
++        "cycle",
++        "seek",
++        "loadfile",
++        "playlist-clear",
++        "playlist-remove",
++        "playlist-move",
++        "playlist-next",
++        "playlist-prev",
++        "playlist-play-index",
++        "playlist-shuffle",
++        "playlist-unshuffle",
++        NULL,
++    };
++    for (int n = 0; allowed[n]; n++) {
++        if (strcmp(name, allowed[n]) == 0)
++            return true;
++    }
++    return false;
++}
++
+ static bool find_cmd(struct mp_log *log, struct mp_cmd *cmd, bstr name)
+ {
+     if (name.len == 0) {
+@@ -82,6 +107,12 @@
+     for (int n = 0; nname[n]; n++) {
+         if (nname[n] == '_')
+             nname[n] = '-';
++    }
++
++    if (!mp_cmd_is_nijineko_allowed(nname)) {
++        mp_err(log, "Command '%.*s' not available in this build.\n",
++               BSTR_P(name));
++        return false;
+     }
+ 
+     for (int n = 0; mp_cmds[n].name; n++) {
+@@ -621,6 +652,8 @@
+ {
+     for (int i = 0; mp_cmds[i].name; i++) {
+         const struct mp_cmd_def *def = &mp_cmds[i];
++        if (!mp_cmd_is_nijineko_allowed(def->name))
++            continue;
+         mp_info(out, "%-25s", def->name);
+         for (int j = 0; j < MP_CMD_DEF_MAX_ARGS && def->args[j].type; j++) {
+             const struct m_option *arg = &def->args[j];
+diff --git a/player/command.c b/player/command.c
+--- a/player/command.c
++++ b/player/command.c
+@@ -3977,6 +3977,8 @@
+ 
+         for (int n = 0; mp_cmds[n].name; n++) {
+             const struct mp_cmd_def *cmd = &mp_cmds[n];
++            if (!mp_cmd_is_nijineko_allowed(cmd->name))
++                continue;
+             struct mpv_node *entry = node_array_add(root, MPV_FORMAT_NODE_MAP);
+ 
+             node_map_add_string(entry, "name", cmd->name);
+diff --git a/player/scripting.c b/player/scripting.c
+--- a/player/scripting.c
++++ b/player/scripting.c
+@@ -54,7 +54,6 @@
+ #if HAVE_JAVASCRIPT
+     &mp_scripting_js,
+ #endif
+-    &mp_scripting_run,
+     NULL
+ };
+ 

@@ -1,0 +1,18 @@
+--- a/common/version.c
++++ b/common/version.c
+@@ -19,6 +19,15 @@
+ #include "common.h"
+ #include "version.h"
+ 
++#include <stdio.h>
++
++/* FutaNeko contributorsが2026-09-06に変更。LGPL差し替え試験専用。 */
++__attribute__((constructor))
++static void futaneko_lgpl_relink_probe(void)
++{
++    fputs("FUTANEKO_LGPL_MODIFIED_MPV_LOADED_20260906\n", stderr);
++}
++
+ const char mpv_version[]  = "mpv " VERSION;
+ const char mpv_builddate[] = BUILDDATE;
+ const char mpv_copyright[] = MPVCOPYRIGHT;

@@ -1,0 +1,66 @@
+diff --git a/meson.build b/meson.build
+index b8e16b1..89cc953 100644
+--- a/meson.build
++++ b/meson.build
+@@ -30,14 +30,9 @@ libplacebo = dependency('libplacebo', version: '>=6.338.2',
+                 default_options: ['default_library=static', 'demos=false'])
+ 
+-libass = dependency('libass', version: '>= 0.12.2')
+-
+-# the dependency order of libass -> ffmpeg is necessary due to
+-# static linking symbol resolution between fontconfig and MinGW
+-dependencies = [libass,
+-                libavcodec,
++dependencies = [libavcodec,
+                 libavfilter,
+                 libavformat,
+                 libavutil,
+                 libplacebo,
+                 libswresample,
+                 libswscale]
+@@ -47,6 +42,6 @@ features = {
+     'debug': get_option('debug'),
+     'ffmpeg': true,
+     'gpl': get_option('gpl'),
+-    'libass': true,
++    'libass': false,
+     'libplacebo': true,
+ }
+@@ -195,15 +190,13 @@ sources = files(
+     'stream/stream_slice.c',
+ 
+     ## Subtitles
+-    'sub/ass_mp.c',
+     'sub/dec_sub.c',
+     'sub/draw_bmp.c',
+     'sub/filter_sdh.c',
+     'sub/img_convert.c',
+     'sub/lavc_conv.c',
++    'sub/no_subtitles.c',
+     'sub/osd.c',
+-    'sub/osd_libass.c',
+-    'sub/sd_ass.c',
+     'sub/sd_lavc.c',
+ 
+     ## Video
+diff --git a/player/command.c b/player/command.c
+index b71a0d0..2c60012 100644
+--- a/player/command.c
++++ b/player/command.c
+@@ -25,7 +25,6 @@
+ #include <math.h>
+ #include <sys/types.h>
+ 
+-#include <ass/ass.h>
+ #include <libavutil/avstring.h>
+ #include <libavutil/common.h>
+ #include <libavutil/timecode.h>
+@@ -3754,7 +3753,7 @@ static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
+ static int mp_property_libass_version(void *ctx, struct m_property *prop,
+                                       int action, void *arg)
+ {
+-    return m_property_int64_ro(action, arg, ass_library_version());
++    return m_property_int64_ro(action, arg, 0);
+ }
+ 
+ static int mp_property_platform(void *ctx, struct m_property *prop,

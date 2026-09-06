@@ -1,0 +1,121 @@
+[
+  {
+    "name": "mpv",
+    "version": "0.41.0",
+    "commit": "41f6a645068483470267271e1d09966ca3b9f413",
+    "archive": "mpv-0.41.0.tar.gz",
+    "sha256": "ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209",
+    "url": "https://github.com/mpv-player/mpv/archive/refs/tags/v0.41.0.tar.gz",
+    "selected_license": "LGPL-2.1-or-later（選択ビルド）",
+    "role": "linked",
+    "license_files": [
+      "LICENSE.LGPL",
+      "LICENSE.GPL",
+      "Copyright"
+    ]
+  },
+  {
+    "name": "ffmpeg",
+    "version": "8.1.2",
+    "commit": "38b88335f99e76ed89ff3c93f877fdefce736c13",
+    "archive": "ffmpeg-8.1.2.tar.xz",
+    "sha256": "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c",
+    "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",
+    "selected_license": "LGPL-2.1-or-later（選択ビルド）",
+    "role": "linked",
+    "license_files": [
+      "LICENSE.md",
+      "COPYING.LGPLv2.1",
+      "COPYING.LGPLv3",
+      "COPYING.GPLv2",
+      "COPYING.GPLv3",
+      "doc/authors.texi"
+    ]
+  },
+  {
+    "name": "dav1d",
+    "version": "1.5.4",
+    "commit": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+    "archive": "dav1d-1.5.4.tar.bz2",
+    "sha256": "2abfb0c89212e6e4733a54e0ae509ec00a5b845a6360946f918806e14aedb011",
+    "url": "https://code.videolan.org/videolan/dav1d/-/archive/1.5.4/dav1d-1.5.4.tar.bz2",
+    "selected_license": "BSD-2-Clause",
+    "role": "linked",
+    "license_files": [
+      "COPYING",
+      "doc/PATENTS"
+    ]
+  },
+  {
+    "name": "libplacebo",
+    "version": "7.360.1",
+    "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+    "archive": "libplacebo-7.360.1.tar.bz2",
+    "sha256": "937aa5eeea596798b3274d362de2e3bd32bc537a66d149dd85043349c74dffb6",
+    "url": "https://code.videolan.org/videolan/libplacebo/-/archive/v7.360.1/libplacebo-v7.360.1.tar.bz2",
+    "selected_license": "LGPL-2.1-or-later",
+    "role": "linked",
+    "license_files": [
+      "LICENSE",
+      "demos/LICENSE"
+    ]
+  },
+  {
+    "name": "jinja",
+    "version": "",
+    "commit": "15206881c006c79667fe5154fe80c01c65410679",
+    "archive": "jinja-15206881c006c79667fe5154fe80c01c65410679.tar.gz",
+    "sha256": "b88a20dcc2e34072fcf4159325bc6c34cd4b29a81a8b83d15d2f28ba561da296",
+    "url": "https://github.com/pallets/jinja/archive/15206881c006c79667fe5154fe80c01c65410679.tar.gz",
+    "selected_license": "BSD-3-Clause",
+    "role": "build-only",
+    "license_files": [
+      "LICENSE.txt"
+    ]
+  },
+  {
+    "name": "markupsafe",
+    "version": "",
+    "commit": "297fc8e356e6836a62087949245d09a28e9f1b13",
+    "archive": "markupsafe-297fc8e356e6836a62087949245d09a28e9f1b13.tar.gz",
+    "sha256": "da7c010c9c81a66ac73036558c1fcb6212b50482f43211cd1254035b94f82414",
+    "url": "https://github.com/pallets/markupsafe/archive/297fc8e356e6836a62087949245d09a28e9f1b13.tar.gz",
+    "selected_license": "BSD-3-Clause",
+    "role": "build-only",
+    "license_files": [
+      "LICENSE.txt"
+    ]
+  },
+  {
+    "name": "vulkan-headers",
+    "version": "",
+    "commit": "450bd2232225d6c7728a4108055ac2e37cef6475",
+    "archive": "vulkan-headers-450bd2232225d6c7728a4108055ac2e37cef6475.tar.gz",
+    "sha256": "26df9841c30806a994e2fdf42f7c87bcb1ced9db9a06033469123939fb3fa075",
+    "url": "https://github.com/KhronosGroup/Vulkan-Headers/archive/450bd2232225d6c7728a4108055ac2e37cef6475.tar.gz",
+    "selected_license": "Apache-2.0 / MIT（ファイル別）",
+    "role": "build-input",
+    "license_files": [
+      "LICENSE.md",
+      "LICENSES/Apache-2.0.txt",
+      "LICENSES/MIT.txt",
+      ".reuse/dep5"
+    ]
+  },
+  {
+    "name": "fast-float",
+    "version": "",
+    "commit": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+    "archive": "fast-float-97b54ca9e75f5303507699d27c6b4f4efe4641a1.tar.gz",
+    "sha256": "2b132274539286e41f37857cac22aa8441d21bd86d55de825a3342b149f66801",
+    "url": "https://github.com/fastfloat/fast_float/archive/97b54ca9e75f5303507699d27c6b4f4efe4641a1.tar.gz",
+    "selected_license": "MIT（選択）",
+    "role": "linked-header-code",
+    "license_files": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE",
+      "LICENSE-BOOST",
+      "AUTHORS"
+    ]
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "build": "1",
+  "bundle_id": "com.dieod.futaneko",
+  "macho_count": 17,
+  "mpv_in_ipa_sha256": "b56699a16e225d3105830e90e4e590d9c86b509be2fca1bfedc55a44a56e3280",
+  "mpv_linked_sections_sha256": "68349d66fd6248d5f60c764f6148a0a5473816f4044b8bef7be3c28ca4b0a7f6",
+  "mpv_original_sha256": "cff1188505949729fc34db9722ba48cc137f98c3d0fc524d79e63843333db263",
+  "original_profile_removed": true,
+  "app_source_included": false,
+  "encrypted_macho_count": 0,
+  "source_matching_method": "archived-source-rebuild-api-dependencies-config-patchset",
+  "reference_sections_match": false,
+  "byte_identical_rebuild_claimed": false,
+  "original_ipa_sha256": "0cb1c25d9a47ef17f6623d4e87afc0b1645e3bb635b5d07d8fa312ee9c4ffaef",
+  "schema_version": 1,
+  "materials_kind": "public-library-compliance-materials",
+  "materials_repository": "https://github.com/dieOD/futaneko-video-compliance",
+  "build_info_origin": "archived-source-rebuild",
+  "archives": [
+    {
+      "file": "FutaNeko-1.0.0-1-video-sources.tar.gz",
+      "sha256": "7f89788b899a164ca548a2c6ed6a0eb09aef286d5706e67bac374fbf5b5caf77",
+      "bytes": 24726434,
+      "checked_files": 72
+    },
+    {
+      "file": "FutaNeko-1.0.0-1-relink.tar.gz",
+      "sha256": "198236c6dac9fe764f1885cbeef8405f5af405a96e7a909abba29e70cac006eb",
+      "bytes": 14013794,
+      "checked_files": 142
+    }
+  ]
+}

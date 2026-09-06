@@ -1,0 +1,110 @@
+[
+  {
+    "relative_path": "ffmpeg/libavcodec/aac_ac3_parser.c",
+    "sha256_before": "8b92e409d4e18bfea89492898cc2ec7a16ee0490e6c892bff049b6c85555fef0",
+    "sha256_after": "d4dd6adadddb601d57c3c25890bfd381b7702fbb5c49828ec06d5c035b2419ff",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "ffmpeg/libavcodec/get_buffer.c",
+    "sha256_before": "83d8594171732675c131248b212b41d3efebc59f5f9bc388b5f792e8edce6782",
+    "sha256_after": "be2c939d3a8e157fb61ecab02ffff2aab1ae821248b114897922abbe9e3bfd6a",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "ffmpeg/libavcodec/h264_direct.c",
+    "sha256_before": "e90713e406d74e2eaadca0fa079d96be390db4857fadf92dd617970be9d3331c",
+    "sha256_after": "3490e79d45cb37ea153cdaa056f4005ce51fb3628e830a0a203bba5cc1a80137",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "ffmpeg/libavcodec/h264_slice.c",
+    "sha256_before": "53dd5bfcb0847f7ffd0ae3e38f747608e211ca71cf2eeec440ea6d06f8960ced",
+    "sha256_after": "313995053af6b034d9796e9e4212ee97b0435ffaad803462befa7177ed2e37cf",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "ffmpeg/libavcodec/pthread_frame.c",
+    "sha256_before": "76ba8917dc9a629d365e9b69769964538752b878ef801a2a401359e613edc729",
+    "sha256_after": "2cfe869d298ffac915abb142c758afa2e5959e3e9186f88c2e4b8741de155a88",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "ffmpeg/libavformat/iamf_parse.c",
+    "sha256_before": "95cbd5bae208cddeb55afd4fc1d716f4fb1567e348276114220c4594b5a8cb39",
+    "sha256_after": "b24ac89d3067b7eb3a151b67ae6811e71ae287f88e15a676bec47c7b538c59d1",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "ffmpeg/libavformat/mov.c",
+    "sha256_before": "37b39b08aa30029c22c0ca7dd780b0ed499a3d4b080068e53aeb3af85dae689d",
+    "sha256_after": "48585fa60493b27951396e76b5030eedcddc1f7521794e9a9793a69606204f15",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mp4_export.m",
+    "sha256_before": "d1707137a6746caa6311314b9c7069d3ccbaa333b6ca043b63f8f9b181b2c187",
+    "sha256_after": "1673e4bb346922f6152ac6ec04e9a7b2fb45b1793465d49757fe18e0f667f655",
+    "date": "2026-09-06"
+  },
+  {
+    "relative_path": "mpv/audio/out/ao_audiounit.m",
+    "sha256_before": "ff03073133f0854ec8c0eb7d132c0168fc0240620bb9f3b135d3c6e25982a0d5",
+    "sha256_after": "d10c3d10c0225056c7b2b47fea7be15ba92a5f7e2156209c041d652e3e3c1d3a",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/demux/demux.c",
+    "sha256_before": "df8fc208c719a62d5e3f4e21048e04491b19cc07019aa084ccf8cc832977ded7",
+    "sha256_after": "085618ab75d81be1f9652ae72bd6a8d4d7c57337eba5ba124b2595ae38e1c4e1",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/input/cmd.c",
+    "sha256_before": "664bdb6e335139d3bbcfce7ebd043d9667e7edd8cdb93952e7f20f01fb6bdaf5",
+    "sha256_after": "a48fa58dd2ec22ebf5d7ef5704c0fb07a30fd44112c5fccaeae6b2d560d6ae01",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/input/cmd.h",
+    "sha256_before": "84defb3b43350f8c55752ebfea9b4a95ee1352e2cdabce01acff36504e76034d",
+    "sha256_after": "7f48276ddd336ffa8376a99c9ce4c3bf614461ccc1b2bbae890132403ada9316",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/meson.build",
+    "sha256_before": "c1028fdc929f313db18fdca9117526507df3433dfe5c6ae787ba5aa93b06daff",
+    "sha256_after": "e38d33a7643d7ef92b4e83b07cca3ca5e40088ee6ed9cc348f24c59d33af22dd",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/player/client.c",
+    "sha256_before": "b6479460b08fc7b54c69f46090bdc6f12452af8d9789e6568317253b71a7ea92",
+    "sha256_after": "9f13ae8bdeb2279f08be31ab7229d45a19139d78d5c15570eb9795728147067a",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/player/command.c",
+    "sha256_before": "7b56ff8c8539b19f834d7e934a712b15366472c3bac5b5a24e6f554f0b12aa67",
+    "sha256_after": "2ef4d2cce07f3e227fb36fdfdd04a31865473f0a14347bca68397eb622419e81",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/player/scripting.c",
+    "sha256_before": "c8d406bb6048aa23a75226907a2cdc4483bcc3ff0d5a51612b8e388e239ca9df",
+    "sha256_after": "e348a356ca3f314e92a8c03d84300972c6c680809f4c26b12f2d3702f3c7d53d",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "mpv/sub/no_subtitles.c",
+    "sha256_before": "dd096a51a9b62c3d64be7f615a2f70f9e8bc0b2ebb4a70572b4745a0be12ec4e",
+    "sha256_after": "7f63622f2d656db676ae6823716f44c65263f0f3294bbeb8eda43654b68657d7",
+    "date": "2026-08-31"
+  },
+  {
+    "relative_path": "version_probe.c",
+    "sha256_before": "8197eb8128c23b1bded4757da2245c5fb984114e4e4f1cb9d35de10841b6b6d7",
+    "sha256_after": "519b0a558dee6e525b90e1fffda5e093f283f7c5e53751d3ad90a94da8fdb6ce",
+    "date": "2026-08-31"
+  }
+]

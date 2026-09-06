@@ -1,0 +1,126 @@
+diff --git a/audio/out/ao_audiounit.m b/audio/out/ao_audiounit.m
+index 8d4eb4d..c053e4d 100644
+--- a/audio/out/ao_audiounit.m
++++ b/audio/out/ao_audiounit.m
+@@ -24,6 +24,8 @@
+ #include "ao_coreaudio_utils.h"
+ #include "ao_coreaudio_chmap.h"
+ 
++#include <pthread.h>
++
+ #import <AudioUnit/AudioUnit.h>
+ #import <CoreAudio/CoreAudioTypes.h>
+ #import <AudioToolbox/AudioToolbox.h>
+@@ -33,8 +35,12 @@
+ struct priv {
+     AudioUnit audio_unit;
+     double device_latency;
++    bool session_acquired;
+ };
+ 
++static pthread_mutex_t audiounit_session_lock = PTHREAD_MUTEX_INITIALIZER;
++static int audiounit_session_use_count;
++
+ static OSStatus au_get_ary(AudioUnit unit, AudioUnitPropertyID inID, AudioUnitScope inScope, AudioUnitElement inElement, void **data, UInt32 *outDataSize)
+ {
+     OSStatus err;
+@@ -82,6 +88,62 @@ static AudioChannelLayout *convert_layout(AudioChannelLayout *layout, UInt32* si
+     return new_layout;
+ }
+ 
++static void acquire_audio_session(struct ao *ao, NSInteger pref_channels)
++{
++    struct priv *p = ao->priv;
++    AVAudioSession *instance = AVAudioSession.sharedInstance;
++
++    pthread_mutex_lock(&audiounit_session_lock);
++
++    if (audiounit_session_use_count == 0) {
++        AVAudioSessionCategoryOptions options = 0;
++        if (!(ao->init_flags & AO_INIT_EXCLUSIVE))
++            options |= AVAudioSessionCategoryOptionMixWithOthers;
++
++        [instance setCategory:AVAudioSessionCategoryPlayback
++                  withOptions:options
++                        error:nil];
++        [instance setMode:AVAudioSessionModeMoviePlayback error:nil];
++        [instance setActive:YES error:nil];
++        [instance setPreferredOutputNumberOfChannels:pref_channels error:nil];
++    }
++
++    audiounit_session_use_count++;
++    p->session_acquired = true;
++
++    MP_VERBOSE(ao, "audio session users: %d\n", audiounit_session_use_count);
++    pthread_mutex_unlock(&audiounit_session_lock);
++}
++
++static void release_audio_session(struct ao *ao)
++{
++    struct priv *p = ao->priv;
++
++    if (!p->session_acquired)
++        return;
++
++    pthread_mutex_lock(&audiounit_session_lock);
++
++    if (audiounit_session_use_count > 0) {
++        audiounit_session_use_count--;
++    } else {
++        MP_WARN(ao, "audio session reference count underflow\n");
++    }
++    p->session_acquired = false;
++
++    if (audiounit_session_use_count == 0) {
++        [AVAudioSession.sharedInstance
++            setActive:NO
++            withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation
++            error:nil];
++    } else {
++        MP_VERBOSE(ao, "keeping audio session active for %d other user(s)\n",
++                   audiounit_session_use_count);
++    }
++
++    pthread_mutex_unlock(&audiounit_session_lock);
++}
++
+ 
+ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
+                               const AudioTimeStamp *ts, UInt32 bus,
+@@ -115,15 +177,7 @@ static bool init_audiounit(struct ao *ao)
+ 
+     MP_VERBOSE(ao, "max channels: %ld, requested: %d\n", maxChannels, (int)ao->channels.num);
+ 
+-    AVAudioSessionCategoryOptions options = 0;
+-    if (!(ao->init_flags & AO_INIT_EXCLUSIVE)) {
+-        options |= AVAudioSessionCategoryOptionMixWithOthers;
+-    }
+-
+-    [instance setCategory:AVAudioSessionCategoryPlayback withOptions:options error:nil];
+-    [instance setMode:AVAudioSessionModeMoviePlayback error:nil];
+-    [instance setActive:YES error:nil];
+-    [instance setPreferredOutputNumberOfChannels:prefChannels error:nil];
++    acquire_audio_session(ao, prefChannels);
+ 
+     AudioComponentDescription desc = (AudioComponentDescription) {
+         .componentType         = kAudioUnitType_Output,
+@@ -206,6 +260,7 @@ coreaudio_error_audiounit:
+ coreaudio_error_component:
+     AudioComponentInstanceDispose(p->audio_unit);
+ coreaudio_error:
++    release_audio_session(ao);
+     talloc_free(layout);
+     return false;
+ }
+@@ -235,10 +290,7 @@ static void uninit(struct ao *ao)
+     AudioUnitUninitialize(p->audio_unit);
+     AudioComponentInstanceDispose(p->audio_unit);
+ 
+-    [AVAudioSession.sharedInstance
+-        setActive:NO
+-        withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation
+-        error:nil];
++    release_audio_session(ao);
+ }
+ 
+ static int init(struct ao *ao)
