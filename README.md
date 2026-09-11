@@ -14,11 +14,14 @@ FutaNekoはLGPL 2.1以降の [FFmpeg](https://ffmpeg.org/)、mpv、libplaceboと
 | --- | --- | --- |
 | 1.0.0 (1) | 配布済みTestFlight版。MP4変換追加前 | [ビルド1の資料一式](https://github.com/dieOD/futaneko-video-compliance/releases/tag/ios-1.0.0-1) |
 | 1.0.0 (2) | MP4変換を含む未提出候補の記録（固定済みスナップショット） | [ビルド2の資料一式](https://github.com/dieOD/futaneko-video-compliance/releases/tag/ios-1.0.0-2) |
-| 1.0.0 (3) | 初回ストア提出用の候補。MP4／MOV判定修正とアプリ内の利用条件・資料案内を含む | [ビルド3の資料一式](https://github.com/dieOD/futaneko-video-compliance/releases/tag/ios-1.0.0-3) |
+| 1.0.0 (3) | 初回ストア提出版の記録。MP4／MOV判定修正とアプリ内の利用条件・資料案内を含む | [ビルド3の資料一式](https://github.com/dieOD/futaneko-video-compliance/releases/tag/ios-1.0.0-3) |
+| 1.0.0 (4) | 再審査用ビルド。サムネイル初期OFF・初期NG・NG巻き込み修正を含む | [ビルド4の資料一式](https://github.com/dieOD/futaneko-video-compliance/releases/tag/ios-1.0.0-4) |
 
 Build 2の資料は、固定済みIPAから作成した当時のスナップショットです。現在のアプリソースに加わった後続の変更（動画MIME検証の修正を含む）は含みません。App Store提出済み・承認済み・最新版であることを示す資料ではありません。
 
 Build 3は別のIPAに対応する新しい資料です。動画ネイティブ部品はBuild 2と同じ構成で、本体側の後続修正を含む再リンク材料を提供します。初回公開版のFutafuta連携と内部検証機能は無効です。Build 1・2の固定資料は上書きしていません。
+
+Build 4は再審査用の別IPAに対応する資料です。動画ネイティブ部品はBuild 3と同じ構成で、本体側にサムネイル初期OFF・初期NG・NG巻き込み修正を含みます。利用者は設定からサムネイル表示をON/OFFできます。Futafuta連携・内部検証機能は無効を維持し、Build 1・2・3の固定資料は上書きしていません。
 
 資料の公開は、そのアプリがApp Storeで一般公開済みであることや、Appleの審査承認を意味しません。
 
@@ -46,7 +49,7 @@ macOS、Xcode、Python 3.10以降、必要なビルドツールが必要です�
 
 動画部品側の改修・自作補助コードは [LGPL 2.1以降](COPYING.LGPL-2.1) で提供します。既存のMIT・BSD・Apache等の上流条件、著作権・特許通知は保持します。ファイル別の範囲は [LICENSE_SCOPE.ja.md](LICENSE_SCOPE.ja.md)、本体の自身の利用のための改変・デバッグの追加許可は [BINARY_USE_TERMS.ja.md](BINARY_USE_TERMS.ja.md) を確認してください。
 
-ソースからの再構築、公開API・署名等の検査、別IDコピーへの差し替えを技術的に確認しています。ビルド1は当時の保存ソースに基づく版・構成・パッチ・API・依存の照合であり、配布IPAとの全バイト一致の再現ビルドを証明したものではありません。ビルド2・3では元のネイティブ成果物との実装section照合とソースのハッシュ確認も行っています。検証条件の詳細は各manifestと説明書に記録しています。
+ソースからの再構築、公開API・署名等の検査、別IDコピーへの差し替えを技術的に確認しています。ビルド1は当時の保存ソースに基づく版・構成・パッチ・API・依存の照合であり、配布IPAとの全バイト一致の再現ビルドを証明したものではありません。ビルド2・3・4は製品Frameworkとの実装section照合とソースのハッシュ確認も行う構成です。ビルド4の保管Frameworkは旧記録のSHA-256とも照合しています。各版の実測結果と検証条件は、それぞれのmanifestと説明書を確認してください。
 
 これらの技術試験は、あらゆる環境での動作、ライセンスやAppleの条件への法的適合、第三者の権利について保証するものではありません。
 

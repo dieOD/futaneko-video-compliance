@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "build": "4",
+  "bundle_id": "com.dieod.futaneko",
+  "macho_count": 17,
+  "mpv_in_ipa_sha256": "e053fe7423a7b36297af939d035ec8b33a89163db94522f430f162beb4f89298",
+  "mpv_linked_sections_sha256": "4dc117031317aec672746630bda74d600b53b40674bd3e52636345da5af06433",
+  "mpv_original_sha256": "db9346248d81251433c04b909986fd8e9d04f549f32c3a6faff7c8dcf311ff1a",
+  "original_profile_removed": true,
+  "app_source_included": false,
+  "encrypted_macho_count": 0,
+  "source_matching_method": "original-build-sections-and-source-hashes",
+  "reference_sections_match": true,
+  "byte_identical_rebuild_claimed": false,
+  "original_ipa_sha256": "bfede70620215b78aacc5e707c7dd4d83cfd402673212719789cd350e53d94b0",
+  "schema_version": 1,
+  "materials_kind": "public-library-compliance-materials",
+  "materials_repository": "https://github.com/dieOD/futaneko-video-compliance",
+  "build_info_origin": "original-native-build",
+  "kit": "video-sources"
+}

@@ -1,0 +1,246 @@
+--- a/libavformat/iamf_parse.c
++++ b/libavformat/iamf_parse.c
+@@ -609,6 +609,7 @@
+ static int param_parse(void *s, IAMFContext *c, AVIOContext *pb,
+                        unsigned int type,
+                        const IAMFAudioElement *audio_element,
++                       const IAMFCodecConfig *codec_config,
+                        AVIAMFParamDefinition **out_param_definition)
+ {
+     IAMFParamDefinition *param_definition = NULL;
+@@ -631,14 +632,10 @@
+ 
+     if (mode == 0) {
+         duration = ffio_read_leb(pb);
+-        if (!duration)
++        if (!duration || duration > av_rescale(codec_config->nb_samples,
++                                               codec_config->sample_rate, parameter_rate)) {
++            av_log(s, AV_LOG_ERROR, "Invalid block duration in parameter_id %u\n", parameter_id);
+             return AVERROR_INVALIDDATA;
+-        if (audio_element) {
+-            const IAMFCodecConfig *codec_config = ff_iamf_get_codec_config(c, audio_element->codec_config_id);
+-            if (duration > av_rescale(codec_config->nb_samples, codec_config->sample_rate, parameter_rate)) {
+-                av_log(s, AV_LOG_ERROR, "Invalid block duration in parameter_id %u\n", parameter_id);
+-                return AVERROR_INVALIDDATA;
+-            }
+         }
+         constant_subblock_duration = ffio_read_leb(pb);
+         if (constant_subblock_duration == 0)
+@@ -668,7 +665,7 @@
+ 
+         if (constant_subblock_duration == 0) {
+             subblock_duration = ffio_read_leb(pb);
+-            if (duration - total_duration > subblock_duration) {
++            if (subblock_duration > duration - total_duration) {
+                 av_log(s, AV_LOG_ERROR, "Invalid subblock durations in parameter_id %u\n", parameter_id);
+                 av_free(param);
+                 return AVERROR_INVALIDDATA;
+@@ -899,13 +896,17 @@
+                 ret = AVERROR_INVALIDDATA;
+                 goto fail;
+             }
+-            ret = param_parse(s, c, pbc, type, audio_element, &element->demixing_info);
++            ret = param_parse(s, c, pbc, type,
++                              audio_element, codec_config,
++                              &element->demixing_info);
+         } else if (type == AV_IAMF_PARAMETER_DEFINITION_RECON_GAIN) {
+             if (element->recon_gain_info) {
+                 ret = AVERROR_INVALIDDATA;
+                 goto fail;
+             }
+-            ret = param_parse(s, c, pbc, type, audio_element, &element->recon_gain_info);
++            ret = param_parse(s, c, pbc, type,
++                              audio_element, codec_config,
++                              &element->recon_gain_info);
+         } else {
+             unsigned param_definition_size = ffio_read_leb(pbc);
+             avio_skip(pbc, param_definition_size);
+@@ -960,6 +961,7 @@
+ static int mix_presentation_obu(void *s, IAMFContext *c, AVIOContext *pb, int len)
+ {
+     AVIAMFMixPresentation *mix;
++    const IAMFCodecConfig *codec_config = NULL;
+     IAMFMixPresentation **tmp, *mix_presentation = NULL;
+     FFIOContext b;
+     AVIOContext *pbc;
+@@ -1035,6 +1037,12 @@
+     }
+ 
+     nb_submixes = ffio_read_leb(pbc);
++    if (!nb_submixes) {
++        av_log(s, AV_LOG_ERROR, "Mix presentation %u has no submixes\n", mix_presentation_id);
++        ret = AVERROR_INVALIDDATA;
++        goto fail;
++    }
++
+     for (int i = 0; i < nb_submixes; i++) {
+         AVIAMFSubmix *sub_mix;
+         unsigned nb_elements, nb_layouts;
+@@ -1046,9 +1054,17 @@
+         }
+ 
+         nb_elements = ffio_read_leb(pbc);
++        if (!nb_elements) {
++            av_log(s, AV_LOG_ERROR, "Submix %d from Mix presentation %u has no audio elements\n",
++                   i, mix_presentation_id);
++            ret = AVERROR_INVALIDDATA;
++            goto fail;
++        }
++
+         for (int j = 0; j < nb_elements; j++) {
+             AVIAMFSubmixElement *submix_element;
+             IAMFAudioElement *audio_element = NULL;
++            const IAMFCodecConfig *config = NULL;
+             unsigned int rendering_config_extension_size;
+ 
+             submix_element = av_iamf_submix_add_element(sub_mix);
+@@ -1071,6 +1087,7 @@
+                 ret = AVERROR_INVALIDDATA;
+                 goto fail;
+             }
++            config = ff_iamf_get_codec_config(c, audio_element->codec_config_id);
+ 
+             for (int k = 0; k < mix_presentation->count_label; k++) {
+                 char *annotation = NULL;
+@@ -1089,14 +1106,22 @@
+             avio_skip(pbc, rendering_config_extension_size);
+ 
+             ret = param_parse(s, c, pbc, AV_IAMF_PARAMETER_DEFINITION_MIX_GAIN,
+-                              audio_element,
++                              audio_element, config,
+                               &submix_element->element_mix_config);
+             if (ret < 0)
+                 goto fail;
+             submix_element->default_mix_gain = av_make_q(sign_extend(avio_rb16(pbc), 16), 1 << 8);
++
++            if (!codec_config || (config->nb_samples >
++                                  av_rescale(codec_config->nb_samples,
++                                             codec_config->sample_rate,
++                                             config->sample_rate)))
++                codec_config = config;
+         }
+ 
+-        ret = param_parse(s, c, pbc, AV_IAMF_PARAMETER_DEFINITION_MIX_GAIN, NULL, &sub_mix->output_mix_config);
++        ret = param_parse(s, c, pbc, AV_IAMF_PARAMETER_DEFINITION_MIX_GAIN,
++                          NULL, codec_config,
++                          &sub_mix->output_mix_config);
+         if (ret < 0)
+             goto fail;
+         sub_mix->default_mix_gain = av_make_q(sign_extend(avio_rb16(pbc), 16), 1 << 8);
+--- a/libavcodec/h264_direct.c
++++ b/libavcodec/h264_direct.c
+@@ -184,20 +184,25 @@
+ static void await_reference_mb_row(const H264Context *const h, H264Ref *ref,
+                                    int mb_y)
+ {
++    if (!HAVE_THREADS || !(h->avctx->active_thread_type & FF_THREAD_FRAME))
++        return;
++
+     int ref_field         = ref->reference - 1;
+     int ref_field_picture = ref->parent->field_picture;
+     int ref_height        = 16 * h->mb_height >> ref_field_picture;
++    int row               = FFMIN(16 * mb_y >> ref_field_picture, ref_height - 1);
+ 
+-    if (!HAVE_THREADS || !(h->avctx->active_thread_type & FF_THREAD_FRAME))
+-        return;
+-
+     /* FIXME: It can be safe to access mb stuff
+      * even if pixels aren't deblocked yet. */
+ 
+-    ff_thread_await_progress(&ref->parent->tf,
+-                             FFMIN(16 * mb_y >> ref_field_picture,
+-                                   ref_height - 1),
++    ff_thread_await_progress(&ref->parent->tf, row,
+                              ref_field_picture && ref_field);
++
++    /* A frame references a field pair as a whole, so the wait above covers
++     * its bottom field only, while the colocated data is read from the field
++     * selected by col_parity. The two are decoded by different threads. */
++    if (ref_field_picture && !FIELD_PICTURE(h))
++        ff_thread_await_progress(&ref->parent->tf, row, 0);
+ }
+ 
+ static void pred_spatial_direct_motion(const H264Context *const h, H264SliceContext *sl,
+@@ -287,7 +292,8 @@
+         return;
+     }
+ 
+-    if (IS_INTERLACED(sl->ref_list[1][0].parent->mb_type[mb_xy])) { // AFL/AFR/FR/FL -> AFL/FL
++    if (sl->ref_list[1][0].parent->field_picture ||
++        IS_INTERLACED(sl->ref_list[1][0].parent->mb_type[mb_xy])) { // AFL/AFR/FR/FL -> AFL/FL
+         if (!IS_INTERLACED(*mb_type)) {                    //     AFR/FR    -> AFL/FL
+             mb_y  = (sl->mb_y & ~1) + sl->col_parity;
+             mb_xy = sl->mb_x +
+@@ -505,7 +511,8 @@
+     await_reference_mb_row(h, &sl->ref_list[1][0],
+                            sl->mb_y + !!IS_INTERLACED(*mb_type));
+ 
+-    if (IS_INTERLACED(sl->ref_list[1][0].parent->mb_type[mb_xy])) { // AFL/AFR/FR/FL -> AFL/FL
++    if (sl->ref_list[1][0].parent->field_picture ||
++        IS_INTERLACED(sl->ref_list[1][0].parent->mb_type[mb_xy])) { // AFL/AFR/FR/FL -> AFL/FL
+         if (!IS_INTERLACED(*mb_type)) {                    //     AFR/FR    -> AFL/FL
+             mb_y  = (sl->mb_y & ~1) + sl->col_parity;
+             mb_xy = sl->mb_x +
+--- a/libavcodec/h264_slice.c
++++ b/libavcodec/h264_slice.c
+@@ -1621,6 +1621,10 @@
+         int field = h->picture_structure == PICT_BOTTOM_FIELD;
+         release_unused_pictures(h, 0);
+         h->cur_pic_ptr->tf.owner[field] = h->avctx;
++        /* h264_frame_start(), which clears this for every other picture, is
++         * not called for a second field. */
++        if (CONFIG_ERROR_RESILIENCE)
++            ff_h264_set_erpic(&h->er.cur_pic, NULL);
+     }
+     /* Some macroblocks can be accessed before they're available in case
+      * of lost slices, MBAFF or threading. */
+--- a/libavcodec/get_buffer.c
++++ b/libavcodec/get_buffer.c
+@@ -95,7 +95,7 @@
+         do {
+             // NOTE: do not align linesizes individually, this breaks e.g. assumptions
+             // that linesize[0] == 2*linesize[1] in the MPEG-encoder for 4:2:2
+-            ret = av_image_fill_linesizes(linesize, avctx->pix_fmt, w);
++            ret = av_image_fill_linesizes(linesize, frame->format, w);
+             if (ret < 0)
+                 goto fail;
+             // increase alignment of w for next try (rhs gives the lowest bit set in w)
+@@ -108,7 +108,7 @@
+ 
+         for (i = 0; i < 4; i++)
+             linesize1[i] = linesize[i];
+-        ret = av_image_fill_plane_sizes(size, avctx->pix_fmt, h, linesize1);
++        ret = av_image_fill_plane_sizes(size, frame->format, h, linesize1);
+         if (ret < 0)
+             goto fail;
+ 
+--- a/libavcodec/pthread_frame.c
++++ b/libavcodec/pthread_frame.c
+@@ -890,17 +890,18 @@
+     }
+     p->thread_init = NEEDS_CLOSE;
+ 
+-    if (first) {
++    if (first)
+         update_context_from_thread(avctx, copy, 1);
+ 
+-        av_frame_side_data_free(&avctx->decoded_side_data, &avctx->nb_decoded_side_data);
+-        for (int i = 0; i < copy->nb_decoded_side_data; i++) {
+-            err = av_frame_side_data_clone(&avctx->decoded_side_data,
+-                                           &avctx->nb_decoded_side_data,
+-                                           copy->decoded_side_data[i], 0);
+-            if (err < 0)
+-                return err;
+-        }
++    const AVCodecContext *src = first ? copy : avctx;
++    AVCodecContext       *dst = first ? avctx : copy;
++    av_frame_side_data_free(&dst->decoded_side_data, &dst->nb_decoded_side_data);
++    for (int i = 0; i < src->nb_decoded_side_data; i++) {
++        err = av_frame_side_data_clone(&dst->decoded_side_data,
++                                       &dst->nb_decoded_side_data,
++                                       src->decoded_side_data[i], 0);
++        if (err < 0)
++            return err;
+     }
+ 
+     atomic_init(&p->debug_threads, (copy->debug & FF_DEBUG_THREADS) != 0);
